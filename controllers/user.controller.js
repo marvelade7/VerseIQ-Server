@@ -76,7 +76,98 @@ const loginUser = (req, res) => {
     });
 };
 
+const getUserProfile = (req, res) => {
+    const userId = req.user._id;
+
+    User.findById(userId)
+        .select("-password")
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            res.json({ user });
+        })
+        .catch((err) => res.status(500).json({ message: "Server error" }));
+};
+
+const updateProfile = (req, res) => {
+    const userId = req.user._id;
+    const { fullName, username, email, currentPassword, newPassword } =
+        req.body;
+
+    User.findById(userId)
+        .select("+password")
+        .then(async (user) => {
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            if (username && username !== user.username) {
+                const existingUsername = await User.findOne({ username });
+                if (existingUsername) {
+                    return res
+                        .status(400)
+                        .json({ message: "Username already taken" });
+                }
+            }
+
+            if (email && email !== user.email) {
+                const existingEmail = await User.findOne({ email });
+                if (existingEmail) {
+                    return res
+                        .status(400)
+                        .json({ message: "Email already in use" });
+                }
+            }
+
+            if (newPassword) {
+                if (!currentPassword) {
+                    return res
+                        .status(400)
+                        .json({
+                            message: "Please provide your current password",
+                        });
+                }
+                const isMatch = await bcrypt.compare(
+                    currentPassword,
+                    user.password,
+                );
+                if (!isMatch) {
+                    return res
+                        .status(400)
+                        .json({ message: "Current password is incorrect" });
+                }
+                user.password = await bcrypt.hash(newPassword, 12);
+            }
+
+            if (fullName) user.fullName = fullName;
+            if (username) user.username = username;
+            if (email) user.email = email;
+
+            // If a new avatar was uploaded, save the Cloudinary URL
+            if (req.file) {
+                user.avatar = req.file.path; // Cloudinary URL
+            }
+
+            return user.save();
+        })
+        .then((updatedUser) => {
+            if (!updatedUser) return;
+
+            const userObj = updatedUser.toObject();
+            delete userObj.password;
+
+            res.json({
+                status: "success",
+                message: "Profile updated successfully",
+                data: userObj,
+            });
+        })
+        .catch((err) => res.status(500).json({ message: "Server error", err }));
+};
+
 module.exports = {
     registerUser,
     loginUser,
+    updateProfile,
 };
