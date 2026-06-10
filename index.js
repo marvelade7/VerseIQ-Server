@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 
 const userRoutes = require("./routes/user.route");
 const questionRoutes = require("./routes/question.route");
+const quizSessionRoutes = require("./routes/quizSession.route");
 
 const app = express();
 
@@ -24,6 +25,7 @@ mongoose
 app.get("/", (req, res) => res.send("Hello World!"));
 app.use("/api/users", userRoutes);
 app.use("/api/questions", questionRoutes);
+app.use("/api/quiz-sessions", quizSessionRoutes);
 // Server
 app.listen(process.env.PORT, () => {
     console.log(`Server running at http://localhost:${process.env.PORT}`);

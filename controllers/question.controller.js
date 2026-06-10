@@ -44,7 +44,7 @@ const oldTestamentQuestions = (req, res) => {
 
 const randomQuestions = (req, res) => {
     const count = parseInt(req.params.count);
-    const questions = Question.aggregate([{ $sample: { size: count } }])
+    Question.aggregate([{ $sample: { size: count } }])
         .then((questions) => res.json(questions))
         .catch((err) => res.status(500).json({ message: "Server error" }));
 };
