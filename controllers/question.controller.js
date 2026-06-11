@@ -49,6 +49,21 @@ const randomQuestions = (req, res) => {
         .catch((err) => res.status(500).json({ message: "Server error" }));
 };
 
+const getQuestionsByIds = (req, res) => {
+    const { ids } = req.body;
+
+    Question.find({ _id: { $in: ids } })
+        .then((questions) => {
+            res.status(200).json({
+                status: "success",
+                data: questions,
+            });
+        })
+        .catch((err) => {
+            res.status(500).json({ message: "Server error", error: err.message });
+        });
+};  
+
 module.exports = {
     allQuestions,
     easyQuestions,
@@ -58,4 +73,5 @@ module.exports = {
     newTestamentQuestions,
     oldTestamentQuestions,
     randomQuestions,
+    getQuestionsByIds,
 };

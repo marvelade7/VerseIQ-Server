@@ -9,6 +9,7 @@ const {
     newTestamentQuestions,
     oldTestamentQuestions,
     randomQuestions,
+    getQuestionsByIds,
 } = require("../controllers/question.controller");
 
 // Route to get all questions
@@ -20,5 +21,6 @@ router.get("/random", randomQuestion);
 router.get("/new-testament", newTestamentQuestions);
 router.get("/old-testament", oldTestamentQuestions);
 router.get("/random/:count", randomQuestions);
+router.post("/by-ids", getQuestionsByIds);
 
 module.exports = router;
