@@ -69,3 +69,5 @@ const quizSessionSchema = new mongoose.Schema({
     accuracy: { type: Number, default: 0 }, // percentage
     timeTaken: { type: Number, default: 0 }, // in seconds
 });
+
+exports = module.exports = mongoose.model("QuizSession", quizSessionSchema);

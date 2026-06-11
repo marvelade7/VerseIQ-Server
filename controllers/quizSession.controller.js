@@ -6,8 +6,8 @@ const startQuiz = (req, res) => {
     const { category, difficulty, count } = req.body;
     const filter = {};
 
-    if (category && category !== "all") filter.category = category;
-    if (difficulty && difficulty !== "all") filter.difficulty = difficulty;
+    if (category && category !== "mixed") filter.category = category;
+    if (difficulty && difficulty !== "mixed") filter.difficulty = difficulty;
 
     Question.aggregate([
         { $match: filter },
@@ -22,8 +22,8 @@ const startQuiz = (req, res) => {
 
             const session = new QuizSession({
                 userId,
-                category: category || "all",
-                difficulty: difficulty || "all",
+                category: category || "mixed",
+                difficulty: difficulty || "mixed",
                 totalQuestions: questions.length,
                 questions: questions.map((q) => q._id),
             });
@@ -41,8 +41,57 @@ const startQuiz = (req, res) => {
                 },
             });
         })
-        .catch((err) => res.status(500).json({ message: "Server error", err }));
+        .catch((err) => res.status(500).json({ message: "Server error", error: err.message}));
 };
+
+// ✅ replace your startQuiz with this
+// const startQuiz = (req, res) => {
+//     const userId = req.user._id;
+//     const { category, difficulty, count } = req.body;
+//     const filter = {};
+
+//     if (category && category !== "mixed") filter.category = category;
+//     if (difficulty && difficulty !== "mixed") filter.difficulty = difficulty;
+
+//     Question.aggregate([
+//         { $match: filter },
+//         { $sample: { size: parseInt(count) || 10 } },
+//     ])
+//         .then((questions) => {
+//             // ❌ the problem was here — returning res.status() doesn't stop
+//             // the chain, the next .then() still runs with undefined
+//             if (questions.length < (parseInt(count) || 10)) {
+//                 return res.status(400).json({
+//                     message: `Not enough questions. Only ${questions.length} available for this filter.`,
+//                 });
+//             }
+
+//             const session = new QuizSession({
+//                 userId,
+//                 category: category || "mixed",
+//                 difficulty: difficulty || "mixed",
+//                 totalQuestions: questions.length,
+//                 questions: questions.map((q) => q._id),
+//             });
+
+//             return session.save(); // ✅ only reaches here if enough questions
+//         })
+//         .then((result) => {
+//             // ✅ result could be the express response object (from the 400 above)
+//             // or the saved session — we check if it's a session by looking for _id
+//             if (!result || !result._id) return;
+
+//             res.status(201).json({
+//                 status: "success",
+//                 message: "Quiz session started",
+//                 data: {
+//                     sessionId: result._id,
+//                     questions: result.questions,
+//                 },
+//             });
+//         })
+//         .catch((err) => res.status(500).json({ message: "Server error", err }));
+// };
 
 const updateQuiz = (req, res) => {
     const userId = req.user._id;
