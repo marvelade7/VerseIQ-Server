@@ -22,5 +22,9 @@ router.get("/new-testament", newTestamentQuestions);
 router.get("/old-testament", oldTestamentQuestions);
 router.get("/random/:count", randomQuestions);
 router.post("/by-ids", getQuestionsByIds);
+// temporarily add this to your question routes
+router.get("/debug-categories", (req, res) => {
+    Question.distinct("category").then((cats) => res.json(cats));
+});
 
 module.exports = router;
