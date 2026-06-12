@@ -10,7 +10,7 @@ const {
 
 router.post('/start', auth, startQuiz);
 router.put('/update/:sessionId', auth, updateQuiz);
-router.get('/history/:userId', auth, getQuizHistory);
+router.get('/history/', auth, getQuizHistory);
 router.get('/result/:sessionId', auth, getQuizResult);
 
 module.exports = router;

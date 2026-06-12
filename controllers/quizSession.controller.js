@@ -2,49 +2,6 @@ const QuizSession = require("../models/quizSession.model");
 const Question = require("../models/question.model");
 const User = require("../models/user.model");
 
-// const startQuiz = (req, res) => {
-//     const userId = req.user._id;
-//     const { category, difficulty, count } = req.body;
-//     const filter = {};
-
-//     if (category && category !== "mixed") filter.category = category;
-//     if (difficulty && difficulty !== "mixed") filter.difficulty = difficulty;
-
-//     Question.aggregate([
-//         { $match: filter },
-//         { $sample: { size: parseInt(count) || 10 } },
-//     ])
-//         .then((questions) => {
-//             if (questions.length < (parseInt(count) || 10)) {
-//                 return res.status(400).json({
-//                     message: `Not enough questions. Only ${questions.length} available for this filter.`,
-//                 });
-//             }
-
-//             const session = new QuizSession({
-//                 userId,
-//                 category: category || "mixed",
-//                 difficulty: difficulty || "mixed",
-//                 totalQuestions: questions.length,
-//                 questions: questions.map((q) => q._id),
-//             });
-
-//             return session.save();
-//         })
-//         .then((newSession) => {
-//             if (!newSession) return; // already responded above
-//             res.status(201).json({
-//                 status: "success",
-//                 message: "Quiz session started",
-//                 data: {
-//                     sessionId: newSession._id,
-//                     questions: newSession.questions,
-//                 },
-//             });
-//         })
-//         .catch((err) => res.status(500).json({ message: "Server error", error: err.message}));
-// };
-
 const startQuiz = (req, res) => {
     const userId = req.user._id;
     const { category, difficulty, count } = req.body;
@@ -156,11 +113,13 @@ const getQuizHistory = (req, res) => {
 
     QuizSession.find({ userId })
         .sort({ startedAt: -1 })
+        .populate({
+            path: "answers.question",
+            select: "questionText options reference difficulty category",
+        })
         .then((sessions) => res.json(sessions))
         .catch((err) =>
-            res
-                .status(500)
-                .json({ message: "Server error", error: err.message }),
+            res.status(500).json({ message: "Server error", error: err.message })
         );
 };
 
