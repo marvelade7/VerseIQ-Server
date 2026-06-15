@@ -121,7 +121,7 @@ const getQuizHistory = (req, res) => {
         .catch((err) =>
             res.status(500).json({ message: "Server error", error: err.message })
         );
-};
+}; 
 
 const getQuizResult = (req, res) => {
     const { sessionId } = req.params;

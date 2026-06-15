@@ -24,7 +24,7 @@ const registerUser = (req, res) => {
         const hashedPassword = bcrypt.hashSync(password, 10);
 
         const newUser = new User({
-            firstName,
+            firstName,   
             lastName,
             email,
             password: hashedPassword,
@@ -92,7 +92,7 @@ const getUserProfile = (req, res) => {
 
 const updateProfile = (req, res) => {
     const userId = req.user._id;
-    const { fullName, username, email, currentPassword, newPassword } =
+    const { firstName, lastName, username, email, currentPassword, newPassword } =
         req.body;
 
     User.findById(userId)
@@ -166,8 +166,23 @@ const updateProfile = (req, res) => {
         .catch((err) => res.status(500).json({ message: "Server error", err }));
 };
 
+const getDashboard = (req, res) => {
+    const userId = req.user._id;
+
+    User.findById(userId)
+        .select("-password")
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            res.json({ user });
+        })
+        .catch((err) => res.status(500).json({ message: "Server error" }));
+};
+
 module.exports = {
     registerUser,
     loginUser,
     updateProfile,
+    getDashboard,
 };
