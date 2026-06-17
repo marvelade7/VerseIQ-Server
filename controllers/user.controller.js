@@ -45,7 +45,7 @@ const registerUser = (req, res) => {
             })
             .catch((err) => {
                 console.error("Error saving user:", err);
-                res.status(500).json({ message: "Server error" });
+                res.status(500).json({ message: "Server error", error: err.message });
             });
     });
 };
@@ -87,7 +87,7 @@ const getUserProfile = (req, res) => {
             }
             res.json({ user });
         })
-        .catch((err) => res.status(500).json({ message: "Server error" }));
+        .catch((err) => res.status(500).json({ message: "Server error", error: err.message }));
 };
 
 const updateProfile = (req, res) => {
@@ -140,7 +140,8 @@ const updateProfile = (req, res) => {
                 user.password = await bcrypt.hash(newPassword, 12);
             }
 
-            if (fullName) user.fullName = fullName;
+            if (firstName) user.firstName = firstName;
+            if (lastName) user.lastName = lastName;
             if (username) user.username = username;
             if (email) user.email = email;
 
@@ -163,7 +164,7 @@ const updateProfile = (req, res) => {
                 data: userObj,
             });
         })
-        .catch((err) => res.status(500).json({ message: "Server error", err }));
+        .catch((err) => res.status(500).json({ message: "Server error", error: err.message }));
 };
 
 const getDashboard = (req, res) => {
@@ -177,7 +178,7 @@ const getDashboard = (req, res) => {
             }
             res.json({ user });
         })
-        .catch((err) => res.status(500).json({ message: "Server error" }));
+        .catch((err) => res.status(500).json({ message: "Server error", error: err.message }));
 };
 
 module.exports = {

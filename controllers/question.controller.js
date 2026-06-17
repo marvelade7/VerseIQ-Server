@@ -64,7 +64,6 @@ const getQuestionsByIds = (req, res) => {
         });
 };  
 
-Question.distinct("category").then(cats => console.log("Categories in DB:", cats));
 module.exports = {
     allQuestions,
     easyQuestions,
