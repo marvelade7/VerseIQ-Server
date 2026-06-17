@@ -53,7 +53,7 @@ const quizSessionSchema = new mongoose.Schema({
             },
             selectedOption: {
                 type: mongoose.Schema.Types.ObjectId, // the option _id they picked
-                required: true,
+                required: false,
             },
             isCorrect: {
                 type: Boolean,
