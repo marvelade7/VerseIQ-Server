@@ -65,6 +65,10 @@ const quizSessionSchema = new mongoose.Schema({
             },
         },
     ],
+    leaderboardPoints: {
+        type: Number,
+        default: 0,
+    },
     streak: { type: Number, default: 0 },
     accuracy: { type: Number, default: 0 }, // percentage
     timeTaken: { type: Number, default: 0 }, // in seconds

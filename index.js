@@ -31,6 +31,7 @@ app.get("/", (req, res) => res.send("Hello World!"));
 app.use("/api/users", userRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/quiz-sessions", quizSessionRoutes);   
+
 // Server
 app.listen(process.env.PORT, () => {
     console.log(`Server running at http://localhost:${process.env.PORT}`);
