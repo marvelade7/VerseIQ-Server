@@ -35,6 +35,7 @@ const registerUser = (req, res) => {
             firstName,
             lastName,
             email,
+            username,
             password: hashedPassword,
         });
 
