@@ -6,9 +6,17 @@ require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const registerUser = (req, res) => {
-    const { firstName, lastName, email, password, confirmPassword } = req.body;
+    const { firstName, lastName, email, username, password, confirmPassword } =
+        req.body;
 
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !username ||
+        !password ||
+        !confirmPassword
+    ) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -24,7 +32,7 @@ const registerUser = (req, res) => {
         const hashedPassword = bcrypt.hashSync(password, 10);
 
         const newUser = new User({
-            firstName,   
+            firstName,
             lastName,
             email,
             password: hashedPassword,
@@ -45,35 +53,46 @@ const registerUser = (req, res) => {
             })
             .catch((err) => {
                 console.error("Error saving user:", err);
-                res.status(500).json({ message: "Server error", error: err.message });
+                res.status(500).json({
+                    message: "Server error",
+                    error: err.message,
+                });
             });
     });
 };
 
 const loginUser = (req, res) => {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!email || !password) {
+    if (!identifier || !password) {
         return res
             .status(400)
-            .json({ message: "Email and password are required" });
+            .json({ message: "Email or username and password are required" });
     }
 
-    User.findOne({ email }).then((user) => {
-        if (!user) {
-            return res.status(400).json({ message: "User not found" });
-        }
+    const query = identifier.includes("@")
+        ? { email: identifier }
+        : { username: identifier };
 
-        const isMatch = bcrypt.compareSync(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid credentials" });
-        }
+    User.findOne(query)
+        .then((user) => {
+            if (!user) {
+                return res.status(400).json({ message: "User not found" });
+            }
 
-        const token = jwt.sign({ id: user._id }, JWT_SECRET, {
-            expiresIn: "2h",
-        });
-        res.json({ token, message: "Login successful", user });
-    });
+            const isMatch = bcrypt.compareSync(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Invalid credentials" });
+            }
+
+            const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+                expiresIn: "1h",
+            });
+
+            const { password: _, ...safeUser } = user.toObject();
+            res.json({ token, message: "Login successful", user: safeUser });
+        })
+        .catch((err) => res.status(500).json({ message: "Server error" }));
 };
 
 const getUserProfile = (req, res) => {
@@ -87,13 +106,23 @@ const getUserProfile = (req, res) => {
             }
             res.json({ user });
         })
-        .catch((err) => res.status(500).json({ message: "Server error", error: err.message }));
+        .catch((err) =>
+            res
+                .status(500)
+                .json({ message: "Server error", error: err.message }),
+        );
 };
 
 const updateProfile = (req, res) => {
     const userId = req.user._id;
-    const { firstName, lastName, username, email, currentPassword, newPassword } =
-        req.body;
+    const {
+        firstName,
+        lastName,
+        username,
+        email,
+        currentPassword,
+        newPassword,
+    } = req.body;
 
     User.findById(userId)
         .select("+password")
@@ -122,11 +151,9 @@ const updateProfile = (req, res) => {
 
             if (newPassword) {
                 if (!currentPassword) {
-                    return res
-                        .status(400)
-                        .json({
-                            message: "Please provide your current password",
-                        });
+                    return res.status(400).json({
+                        message: "Please provide your current password",
+                    });
                 }
                 const isMatch = await bcrypt.compare(
                     currentPassword,
@@ -164,7 +191,11 @@ const updateProfile = (req, res) => {
                 data: userObj,
             });
         })
-        .catch((err) => res.status(500).json({ message: "Server error", error: err.message }));
+        .catch((err) =>
+            res
+                .status(500)
+                .json({ message: "Server error", error: err.message }),
+        );
 };
 
 const getDashboard = (req, res) => {
@@ -178,7 +209,11 @@ const getDashboard = (req, res) => {
             }
             res.json({ user });
         })
-        .catch((err) => res.status(500).json({ message: "Server error", error: err.message }));
+        .catch((err) =>
+            res
+                .status(500)
+                .json({ message: "Server error", error: err.message }),
+        );
 };
 
 module.exports = {
